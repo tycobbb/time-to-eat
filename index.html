@@ -9030,10 +9030,24 @@ body {
 .Window {
   position: relative;
   padding: 4px;
-  background-color: #eee4e4;
+  background-color: #dbd3d3;
   border: 1px solid black;
   box-shadow: 1px 1px 2px #aaaaaa;
   font-family: monospace;
+}
+
+.Window-glow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-width: 1px;
+  border-style: solid;
+  border-top-color: white;
+  border-bottom-color: #a4a4a4;
+  border-left-color: white;
+  border-right-color: #a4a4a4;
 }
 
 .Window-header {
@@ -9044,26 +9058,28 @@ body {
 }
 
 .Window-title {
-  background-color: #eee4e4;
+  background-color: #dbd3d3;
   padding-left: 5px;
   padding-right: 5px;
 }
 
 .Window-body {
+  position: relative;
   border: 1px solid black;
 }
 
-.Window-glow {
+.Window-bodyGlow {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-width: 0;
-  border-top-width: 1px;
-  border-left-width: 1px;
+  top: -2px;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  border-width: 1px;
   border-style: solid;
-  border-color: white;
+  border-top-color: #a4a4a4;
+  border-bottom-color: white;
+  border-left-color: #a4a4a4;
+  border-right-color: white;
 }
 
 #game {
@@ -9076,13 +9092,16 @@ body {
 <!-- body -->
 <body>
 	<!-- container -->
-  <section class="Window">
+  <article class="Window">
     <div class="Window-glow"></div>
     <header class="Window-header">
       <span class="Window-title">time to eat</span>
     </header>
-	  <canvas class="Window-body" id="game"></canvas>
-  </section>
+    <div class="Window-body">
+	    <canvas id="game"></canvas>
+      <div class="Window-bodyGlow"></div>
+    </div>
+  </article>
 
 	<!-- bootstrap -->
 	<script type="module">

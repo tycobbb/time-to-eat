@@ -18,7 +18,7 @@ class AddWalls:
     # -- main --
     def __call__(self):
         # load file
-        with open("game.bitsy", "r") as f:
+        with open("game/game.bitsydata", "r") as f:
             self.lines = f.readlines()
 
         # for each line
@@ -33,7 +33,7 @@ class AddWalls:
                 self.i += 1
 
         # save file
-        with open("game.bitsy", "w") as f:
+        with open("game/game.bitsydata", "w") as f:
             text = "".join(self.lines)
             f.write(text)
 
