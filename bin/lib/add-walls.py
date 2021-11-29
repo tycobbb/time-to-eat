@@ -1,24 +1,33 @@
-#!/usr/bin/env python3
-
 # -- main --
 def main():
-    add_walls = AddWalls()
-    add_walls()
+    cfg = Config("game/game.bitsydata")
+    add = AddWalls(cfg)
+    add()
+
+# -- config --
+# the tool config
+class Config:
+    def __init__(self, path: str):
+        # path to the game bitsydata
+        self.path = path
 
 # -- command --
 # command that add walls to the bitsy game data
 class AddWalls:
-    def __init__(self):
+    def __init__(self, cfg: Config):
+        # the config
+        self.cfg = cfg
+
         # the current line index
         self.i = 0
 
         # the lines in the file
-        self.lines = None
+        self.lines: list[str] = []
 
     # -- main --
     def __call__(self):
         # load file
-        with open("game/game.bitsydata", "r") as f:
+        with open(self.cfg.path, "r") as f:
             self.lines = f.readlines()
 
         # for each line
@@ -33,7 +42,7 @@ class AddWalls:
                 self.i += 1
 
         # save file
-        with open("game/game.bitsydata", "w") as f:
+        with open(self.cfg.path, "w") as f:
             text = "".join(self.lines)
             f.write(text)
 

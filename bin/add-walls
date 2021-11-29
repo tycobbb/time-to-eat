@@ -1,0 +1,2 @@
+#!/bin/sh
+pipenv run python bin/lib/add-walls.py
