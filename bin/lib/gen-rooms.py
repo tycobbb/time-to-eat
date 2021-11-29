@@ -1,4 +1,3 @@
-import base62
 import click
 import os
 import png
@@ -44,7 +43,7 @@ class Id:
   # -- queries --
   # the encoded string for this id
   def encode(self) -> str:
-    return base62.encode(self.val)
+    return base36(self.val)
 
   # a copy of this id
   def copy(self):
@@ -92,8 +91,6 @@ class Room:
           # add a cell for each pixel (1: off, 2: on)
           for xi in range(x0, x1):
             tgrid += str(dat[yi][xi] - 1)
-            if xi != x1 - 1:
-              tgrid += ","
 
           # break each row
           if yi != y1 - 1:
@@ -222,14 +219,28 @@ class GenRooms:
 
     # print the result
     if self.cfg.only_tiles:
-      print(tstr)
+      click.echo(tstr)
     else:
-      print(rstr + tstr)
+      click.echo(rstr + tstr)
 
 # -- helpers --
+ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 # strip and dedent string
 def hdoc(s: str) -> str:
   return textwrap.dedent(s.strip("\n"))
+
+# get the base36 string
+def base36(i: int) -> str:
+  if i < 0:
+      return "-" + base36(-i)
+
+  str = ""
+  while i != 0:
+    i,j = divmod(i, len(ALPHABET))
+    str = ALPHABET[j] + str
+
+  return str or "0"
 
 # -- bootstrap --
 main()
