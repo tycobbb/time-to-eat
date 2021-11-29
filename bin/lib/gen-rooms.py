@@ -1,23 +1,33 @@
 import base62
-import png
+import click
 import os
-import typing as T
+import png
 import textwrap
+import typing as T
 
 from os import path as osp
 
 # -- main --
-def main():
-  cfg = Config("game/rooms")
+@click.command()
+@click.option(
+  "--only-tiles",
+  is_flag = True,
+  help    = "only output tiles"
+)
+def main(only_tiles: bool):
+  cfg = Config("game/rooms", only_tiles)
   gen = GenRooms(cfg)
   gen()
 
 # -- config --
 # the tool config
 class Config:
-  def __init__(self, path: str):
+  def __init__(self, path: str, only_tiles: bool):
     # path to the rooms dir
     self.path = path
+
+    # if only tiles should be printed
+    self.only_tiles = only_tiles
 
 # -- model --
 # a tile id (a counter)
@@ -211,7 +221,10 @@ class GenRooms:
         rstr += "\n"
 
     # print the result
-    print(rstr + tstr)
+    if self.cfg.only_tiles:
+      print(tstr)
+    else:
+      print(rstr + tstr)
 
 # -- helpers --
 # strip and dedent string

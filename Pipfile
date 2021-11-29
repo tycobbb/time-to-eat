@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pypng = "*"
 pybase62 = "*"
+click = "*"
 
 [dev-packages]
 

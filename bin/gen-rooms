@@ -1,2 +1,2 @@
 #!/bin/sh
-pipenv run python bin/lib/gen-rooms.py
+pipenv run python bin/lib/gen-rooms.py "$@"
