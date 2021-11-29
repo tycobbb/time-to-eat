@@ -85,23 +85,29 @@ class Room:
         y0 = y * Tile.SIZE
         y1 = y0 + Tile.SIZE
 
-        # build the tile grid
-        tgrid = ""
+        # build the tile grid, a bitmask
+        ti = 0
+        tgrid = 0
+
+        # for each row
         for yi in range(y0, y1):
-          # add a cell for each pixel (1: off, 2: on)
+          # for each pixel
           for xi in range(x0, x1):
-            tgrid += str(dat[yi][xi] - 1)
+            # if the pixel is on, set this bit to 1
+            if dat[yi][xi] == 2:
+              tgrid |= 1 << ti
+            ti += 1
 
-          # break each row
-          if yi != y1 - 1:
-            tgrid += "\n"
-
-        # create the tile
-        tiles.append(Tile(
-          id   = tid.copy(),
-          name = "{0} ({1},{2})".format(self.name, x, y),
-          grid = tgrid
-        ))
+        # if empty, use empty tile
+        if tgrid == 0:
+          tiles.append(Tile.empty())
+        # otherwise create a tile
+        else:
+          tiles.append(Tile(
+            id   = tid.copy(),
+            name = "{0} ({1},{2})".format(self.name, x, y),
+            grid = tgrid
+          ))
 
         # increment the id
         tid.advance()
@@ -136,7 +142,9 @@ class Room:
     # build the tile string
     tstr = ""
     for tile in tiles:
-      tstr += "{0}\n".format(tile.encode())
+      # from any non-empty tiles
+      if not tile.is_empty():
+        tstr += "{0}\n".format(tile.encode())
 
     # incrememnt the room id
     rid.advance()
@@ -152,7 +160,7 @@ class Tile:
   SIZE = 8
 
   # -- lifetime --
-  def __init__(self, id: Id, name: str, grid: str):
+  def __init__(self, id: Id, name: str, grid: int):
     # the id
     self.id = id
 
@@ -163,8 +171,28 @@ class Tile:
     self.grid = grid
 
   # -- queries --
+  # if the tile is empty
+  def is_empty(self) -> bool:
+    return self.grid == 0
+
   # encode the tile as bitsydata
   def encode(self):
+    i0 = 0
+    i1 = Tile.SIZE * Tile.SIZE
+
+    # format the grid string
+    tgrid = ""
+    for i in range(i0, i1):
+      if (self.grid & (1 << i)) != 0:
+        tgrid += "1"
+      else:
+        tgrid += "0"
+
+      ii = i + 1
+      if (i + 1) % 8 == 0 and ii != i1:
+        tgrid += "\n"
+
+    # format the tile
     tfmt = """
       TIL {0}
       {1}
@@ -174,8 +202,18 @@ class Tile:
 
     return hdoc(tfmt).format(
       self.id.encode(),
-      self.grid,
+      tgrid,
       self.name
+    )
+
+  # -- factories --
+  # create an empty tile
+  @classmethod
+  def empty(cls):
+    return cls(
+      id   = Id(),
+      name = "empty",
+      grid = 0b0,
     )
 
 # -- command --
@@ -199,13 +237,16 @@ class GenRooms:
       if osp.isfile(p) and ext == ".png":
         rooms.append(Room(self.cfg, name=name))
 
-    # track a shared tile id (a encode counter)
+    # track a shared room id and tile id (tile 0 is empty)
     rid = Id()
-    tid = Id()
+    tid = Id(1)
 
     # aggregate the room and tile bitsydata
     rstr = ""
     tstr = ""
+
+    # add the empty tile
+    tstr += "{0}\n".format(Tile.empty().encode())
 
     # for each room
     for i, r in enumerate(rooms):
@@ -221,7 +262,7 @@ class GenRooms:
     if self.cfg.only_tiles:
       click.echo(tstr)
     else:
-      click.echo(rstr + tstr)
+      click.echo("{0}\n{1}".format(rstr, tstr))
 
 # -- helpers --
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
