@@ -321,10 +321,16 @@ class GenRooms:
 
     # for each path in the dir
     d = self.cfg.path
-    for f in os.listdir(d):
-      # if it's a png, add a room
+
+    # get a sorted list of paths (reduce diff thrashing)
+    fs = os.listdir(d)
+    fs.sort()
+
+    # for each file
+    for f in fs:
       name, ext = osp.splitext(f)
 
+      # if it's a png, add a room
       if osp.isfile(osp.join(d, f)) and ext == ".png":
         # get the name and frame, if any
         name, _ = name.split("@")
