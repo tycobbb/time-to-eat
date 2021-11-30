@@ -6,4 +6,4 @@ dir=./game/rooms
 # -- main --
 /Applications/Aseprite.app/Contents/MacOS/aseprite \
     -b "$dir"/rooms.ase \
-    --save-as "$dir"/{slice}.png
+    --save-as "$dir"/{slice}@{frame}.png
