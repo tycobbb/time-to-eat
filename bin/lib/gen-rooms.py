@@ -7,6 +7,9 @@ import typing as T
 
 from os import path as osp
 
+# -- constants --
+ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 # -- main --
 @click.command()
 @click.option(
@@ -42,9 +45,16 @@ class Id:
     self.val += 1
 
   # -- queries --
-  # the encoded string for this id
+  # encode as a str w/ a cycle
   def encode(self) -> str:
-    return base36(self.val)
+    str = ""
+
+    i = self.val
+    while i != 0:
+      i,j = divmod(i, len(ALPHABET))
+      str = ALPHABET[j] + str
+
+    return str or "0"
 
   # a copy of this id
   def copy(self):
@@ -371,23 +381,9 @@ class GenRooms:
       click.echo("{0}\n{1}".format(rstr, tstr))
 
 # -- helpers --
-ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
-
 # strip and dedent string
 def hdoc(s: str) -> str:
   return textwrap.dedent(s.strip("\n"))
-
-# get the base36 string
-def base36(i: int) -> str:
-  if i < 0:
-      return "-" + base36(-i)
-
-  str = ""
-  while i != 0:
-    i,j = divmod(i, len(ALPHABET))
-    str = ALPHABET[j] + str
-
-  return str or "0"
 
 # -- bootstrap --
 main()
