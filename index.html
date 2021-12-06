@@ -9103,6 +9103,142 @@ body {
     </div>
   </article>
 
+	<!-- hacks -->
+	<script>
+		(function() {
+			// capture window
+			const $w = window
+
+			// a 2d map of rooms
+			const map = []
+
+			// a rare necessary ;, so that js doesn't think `[]` is being called by
+			// the parens in the self-executing fn below
+			;
+
+			// override `parseRoom`
+			(function() {
+				const base = $w.parseRoom
+
+				// parse the room
+				function parseRoom(lines, i, compatibilityFlags) {
+					// run the base parser
+					const ii = base(lines, i, compatibilityFlags)
+
+					// if we have a room to extend
+					const r = room[getId(lines[i])]
+					if (r == null) {
+						return ii
+					}
+
+					// and it has a coordinate
+					// TODO: better to do this as a new line to parse, eg `POS 0,0`
+					const parts = r.name.match(/.*([+-]\d+)([+-]\d+)/)
+					if (parts.length !== 3) {
+						return ii
+					}
+
+					// and it's a valid coordinate
+					const x = Number.parseInt(parts[1])
+					const y = Number.parseInt(parts[2])
+
+					if (x == null || y == null) {
+						return ii
+					}
+
+					// add the pos to the room
+					r.x = x
+					r.y = y
+
+					// and store it in the map
+					map[y] ||= []
+					map[y][x] = r
+
+					return ii
+				}
+
+				// add override
+				$w.parseRoom = parseRoom
+			})();
+
+			// override `movePlayer`
+			(function() {
+				const base = $w.movePlayer
+
+				// move the player in a dir (base move fn does not use dir)
+				function movePlayer(dir) {
+					const o = getRoomOffset(dir)
+
+					// if we're moving to a new room
+					if (o == null) {
+						base(dir)
+						return
+					}
+
+					// with the player
+					const p = player()
+
+					// find the pos of the room
+					const r0 = room[p.room]
+					const rx = r0.x + o.x
+					const ry = r0.y + o.y
+
+					// if there is a room to move to there
+					const r1 = map[ry][rx]
+					if (r1 == null) {
+						base(dir)
+						return
+					}
+
+					// get the player's new pos
+					const px = wrap(p.x + o.x)
+					const py = wrap(p.y + o.y)
+
+					console.log(`move to ${rx}, ${ry} @ ${px}, ${py}`)
+
+					// move to it
+					movePlayerThroughExit({
+						dest: {
+							room: r1.id,
+							x: px,
+							y: py,
+						},
+					})
+				}
+
+				/// if moving off-screen, the offset of the room to move to
+				function getRoomOffset(dir) {
+					const p = player()
+
+					// if the move is off-screen, get the delta
+					if (dir == Direction.Up && p.y <= 0) {
+						return { x: 0, y: -1 }
+					}
+					else if (dir == Direction.Down && p.y >= 15) {
+						return { x: 0, y: 1 }
+					}
+					else if (dir == Direction.Left && p.x <= 0) {
+						return { x: -1, y: 0 }
+					}
+					else if (dir == Direction.Right && p.x >= 15) {
+						return { x: 1, y: 0 }
+					}
+
+					// otherwise, no screen move
+					return null
+				}
+
+				/// wrap a component of a room pos
+				function wrap(pos) {
+					return (pos + 16) % 16
+				}
+
+				// add override
+				$w.movePlayer = movePlayer
+			})();
+		})()
+	</script>
+
 	<!-- bootstrap -->
 	<script type="module">
 		(async function main() {
