@@ -9184,7 +9184,7 @@ body {
 					const ry = r0.y + o.y
 
 					// if there is a room to move to there
-					const r1 = map[ry][rx]
+					const r1 = ry in map ? map[ry][rx] : null
 					if (r1 == null) {
 						base(dir)
 						return
@@ -9234,6 +9234,13 @@ body {
 				// add override
 				$w.movePlayer = movePlayer
 			})();
+		})()
+	</script>
+
+	<!-- input -->
+	<script>
+		(function main() {
+
 		})()
 	</script>
 
